@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transfer Data / Datos de Transferencia — Glofy</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/comms-glofy/glofy-assets/refs/heads/main/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --dark:#212121;
+    --dark2:#383838;
+    --dark3:#2b2b2b;
+    --lime:#ceff00;
+    --gray:#e1e1e1;
+    --offwhite:#ededed;
+    --error:#ff6b6b;
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Montserrat',Arial,sans-serif;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(206,255,0,0.06), transparent 60%),
+      var(--dark);
+    color:var(--offwhite);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:48px 20px;
+  }
+  .wrap{width:100%; max-width:620px; display:flex; flex-direction:column; gap:18px;}
+  .card{
+    width:100%;
+    background:var(--dark2);
+    border-radius:10px;
+    padding:42px 36px 44px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.55);
+  }
+
+  /* ---- screen transitions ---- */
+  .screen{ transition:opacity .45s var(--ease), transform .45s var(--ease); }
+  .screen.hidden{ display:none !important; }
+  .screen.entering{ opacity:0; transform:translateY(10px); }
+  .screen.entered{ opacity:1; transform:translateY(0); }
+
+  .top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .logo{ display:inline-block; line-height:0; }
+  .logo img{ height:26px; display:block; transition:opacity .2s var(--ease); }
+  .logo:hover img{ opacity:0.8; }
+  .back-btn{
+    display:inline-flex; align-items:center; justify-content:center; background:none; border:none;
+    color:#adadad; cursor:pointer; width:30px; height:30px; border-radius:50%;
+    margin-top:10px; transition:color .2s var(--ease), background .2s var(--ease), transform .12s var(--ease);
+  }
+  .back-btn:hover{ color:var(--lime); background:rgba(206,255,0,0.08); }
+  .back-btn:active{ transform:scale(.92); }
+  .lang-toggle{ display:flex; background:var(--dark); border-radius:20px; padding:3px; flex-shrink:0; }
+  .lang-toggle button{
+    border:none; background:transparent; color:var(--gray);
+    font-family:inherit; font-size:12px; font-weight:600;
+    padding:6px 13px; border-radius:20px; cursor:pointer;
+    transition:background .25s var(--ease), color .25s var(--ease);
+  }
+  .lang-toggle button.active{ background:var(--lime); color:var(--dark); }
+
+  h1{ font-size:23px; font-weight:800; letter-spacing:-0.3px; margin:16px 0 6px; line-height:1.25; }
+  .eyebrow{ font-size:12px; font-weight:700; letter-spacing:1.2px; color:var(--lime); text-transform:uppercase; margin-bottom:10px; }
+  .subtitle{ color:var(--gray); font-size:14px; margin-bottom:26px; line-height:1.6; }
+
+  .field{ margin-bottom:22px; }
+  label{ display:block; font-size:13px; font-weight:600; margin-bottom:7px; color:var(--offwhite); }
+  .hint{ font-size:12px; color:#adadad; margin-top:6px; line-height:1.45; }
+
+  input[type=text],input[type=email]{
+    width:100%; background:var(--dark3); border:1px solid #4a4a4a; color:var(--offwhite);
+    padding:12px 13px; border-radius:6px; font-family:inherit; font-size:14px;
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  input:focus{ outline:none; border-color:var(--lime); background:var(--dark); }
+  input::placeholder{ color:#7a7a7a; }
+
+  .radio-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .radio-pill{
+    border:1px solid #4a4a4a; padding:10px 17px; border-radius:20px; font-size:13px;
+    cursor:pointer; color:var(--gray); user-select:none;
+    transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease), transform .12s var(--ease);
+  }
+  .radio-pill:hover{ border-color:#6b6b6b; }
+  .radio-pill:active{ transform:scale(.96); }
+  .radio-pill.selected{ border-color:var(--lime); color:var(--lime); background:rgba(206,255,0,0.08); }
+
+  /* ---- accordion reveal for conditional sections ---- */
+  .reveal{
+    display:grid; grid-template-rows:0fr; opacity:0;
+    transition:grid-template-rows .4s var(--ease), opacity .35s var(--ease);
+  }
+  .reveal.open{ grid-template-rows:1fr; opacity:1; }
+  .reveal > div{ overflow:hidden; min-height:0; }
+  .reveal-inner{ padding-top:20px; }
+
+  .section{ border-top:1px solid #444; padding-top:22px; margin-top:8px; }
+  .section-title{ font-size:12px; font-weight:700; color:var(--lime); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .section-note{ font-size:12px; color:#adadad; line-height:1.55; margin-bottom:18px; }
+
+  .file-drop{
+    border:1px dashed #4a4a4a; border-radius:6px; padding:22px; text-align:center;
+    font-size:13px; color:var(--gray); cursor:pointer;
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .file-drop:hover{ border-color:var(--lime); background:rgba(206,255,0,0.04); }
+  .file-drop.has-file{ border-color:var(--lime); color:var(--lime); border-style:solid; }
+  .file-limit{ font-size:11px; color:#7a7a7a; margin-top:7px; text-align:center; }
+
+  .submit-btn{
+    width:100%; background:var(--lime); color:var(--dark); border:none; padding:16px;
+    border-radius:6px; font-weight:800; font-size:14px; font-family:inherit; cursor:pointer;
+    margin-top:14px; display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:transform .12s var(--ease), filter .2s var(--ease);
+  }
+  .submit-btn:hover:not(:disabled){ filter:brightness(1.06); }
+  .submit-btn:active:not(:disabled){ transform:scale(.985); }
+  .submit-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+  .spinner{
+    width:15px; height:15px; border-radius:50%;
+    border:2px solid rgba(33,33,33,0.3); border-top-color:var(--dark);
+    animation:spin .7s linear infinite; display:none;
+  }
+  .submit-btn.loading .spinner{ display:inline-block; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .status{ text-align:center; font-size:13px; margin-top:14px; color:var(--gray); min-height:16px; }
+  .status.error{ color:var(--error); }
+
+  .center{ text-align:center; }
+  .start-btn{
+    background:var(--lime); color:var(--dark); border:none; padding:14px 36px; border-radius:6px;
+    font-weight:800; font-size:14px; font-family:inherit; cursor:pointer; margin-top:8px;
+    transition:transform .12s var(--ease), filter .2s var(--ease);
+  }
+  .start-btn:hover{ filter:brightness(1.06); }
+  .start-btn:active{ transform:scale(.97); }
+
+  .check-wrap{ margin:0 auto 22px; width:56px; height:56px; }
+  .check-circle{
+    fill:none; stroke:var(--lime); stroke-width:3;
+    stroke-dasharray:157; stroke-dashoffset:157;
+    animation:circleIn .5s var(--ease) forwards;
+  }
+  .check-mark{
+    fill:none; stroke:var(--lime); stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:28; stroke-dashoffset:28;
+    animation:checkIn .35s var(--ease) .45s forwards;
+  }
+  @keyframes circleIn{ to{ stroke-dashoffset:0; } }
+  @keyframes checkIn{ to{ stroke-dashoffset:0; } }
+
+  footer{ text-align:center; font-size:11.5px; color:#6e6e6e; padding-bottom:8px; }
+
+  @media (max-width:480px){
+    .card{ padding:30px 22px 34px; }
+    h1{ font-size:20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+
+  <!-- WELCOME SCREEN -->
+  <div id="welcomeScreen" class="screen center">
+    <div class="top" style="margin-bottom:20px;">
+      <a class="logo" href="https://glofy.co" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/comms-glofy/glofy-assets/refs/heads/main/logo-rebrand-glofy.png" alt="Glofy"></a>
+      <div class="lang-toggle">
+        <button type="button" data-lang="en" class="active">EN</button>
+        <button type="button" data-lang="es">ES</button>
+      </div>
+    </div>
+    <div class="eyebrow">People Dept</div>
+    <h1 style="font-size:28px;" data-en="Request for Transfer Information" data-es="Solicitud de Datos para Transferencia">Request for Transfer Information</h1>
+    <p class="subtitle" data-en="Glofy protects your data and uses it exclusively to process this transfer. If you haven't filled out all the required information, contact rrhh@glofy.co for assistance." data-es="Glofy protege tus datos y los utiliza exclusivamente para procesar esta transferencia. Si te falta completar algún dato solicitado, comunicate con rrhh@glofy.co para solicitar asistencia.">Glofy protects your data and uses it exclusively to process this transfer. If you haven't filled out all the required information, contact rrhh@glofy.co for assistance.</p>
+    <button type="button" class="start-btn" id="startBtn" data-en="Start" data-es="Comenzar">Start</button>
+  </div>
+
+  <!-- FORM -->
+  <div id="formScreen" class="screen hidden">
+
+    <div class="top">
+      <a class="logo" href="https://glofy.co" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/comms-glofy/glofy-assets/refs/heads/main/logo-rebrand-glofy.png" alt="Glofy"></a>
+      <div class="lang-toggle">
+        <button type="button" data-lang="en" class="active">EN</button>
+        <button type="button" data-lang="es">ES</button>
+      </div>
+    </div>
+
+    <button type="button" id="backBtn" class="back-btn" aria-label="Back" title="Back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+
+    <h1 data-en="Transfer Data" data-es="Datos para Transferencia" style="margin-top:14px;">Transfer Data</h1>
+
+    <form id="transferForm">
+
+      <div class="field">
+        <label data-en="Full name" data-es="Nombre y apellido">Full name</label>
+        <input type="text" id="fullName" required>
+      </div>
+
+      <div class="field">
+        <label data-en="Email" data-es="Mail">Email</label>
+        <input type="email" id="email" required>
+        <div class="hint" data-en="A copy of your responses will be sent to this address." data-es="A este mail se le enviará una copia de tus respuestas.">A copy of your responses will be sent to this address.</div>
+      </div>
+
+      <div class="field">
+        <label data-en="Currency type" data-es="Tipo de moneda">Currency type</label>
+        <div class="radio-row" id="currencyRow">
+          <div class="radio-pill" data-value="USD">USD</div>
+          <div class="radio-pill" data-value="USDT">USDT</div>
+        </div>
+      </div>
+
+      <!-- ===================== USD branch ===================== -->
+      <div class="reveal" id="usdSection"><div><div class="reveal-inner section">
+        <div class="field">
+          <label data-en="Preferred destination entity in USD" data-es="Entidad de destino en USD preferida">Preferred destination entity in USD</label>
+          <div class="hint" data-en="Example: Payoneer, Binance, ARQ, Nexo, Cocos, etc." data-es="Ejemplo: Payoneer, Binance, ARQ, Nexo, Cocos, etc.">Example: Payoneer, Binance, ARQ, Nexo, Cocos, etc.</div>
+          <div class="radio-row" id="usdEntityRow" style="margin-top:10px;">
+            <div class="radio-pill" data-value="wallet" data-en-label="Wallet" data-es-label="Wallet">Wallet</div>
+            <div class="radio-pill" data-value="foreign" data-en-label="Foreign bank account" data-es-label="Cuenta Bancaria Extranjera">Foreign bank account</div>
+            <div class="radio-pill" data-value="arg" data-en-label="USD-Argentina bank account" data-es-label="Cuenta bancaria USD-Argentina">USD-Argentina bank account</div>
+          </div>
+        </div>
+
+        <!-- Wallet -->
+        <div class="reveal" id="walletFields"><div><div class="reveal-inner">
+          <div class="section-title" data-en="Wallet" data-es="Wallet">Wallet</div>
+          <div class="field">
+            <label data-en="Associated email address" data-es="Email asociado">Associated email address</label>
+            <input type="email" id="walletEmail">
+          </div>
+          <div class="field">
+            <label data-en="Account holder" data-es="Account holder">Account holder</label>
+            <input type="text" id="walletHolder">
+          </div>
+          <div class="field">
+            <label data-en="ACH and Wire routing number" data-es="ACH and Wire routing number">ACH and Wire routing number</label>
+            <input type="text" id="walletRouting">
+          </div>
+          <div class="field">
+            <label data-en="Account number" data-es="Account number">Account number</label>
+            <input type="text" id="walletAccountNumber">
+          </div>
+          <div class="field">
+            <label data-en="Account type" data-es="Account type">Account type</label>
+            <input type="text" id="walletAccountType">
+          </div>
+          <div class="field">
+            <label data-en="Address" data-es="Address">Address</label>
+            <input type="text" id="walletAddress">
+            <div class="hint" data-en="Refers to the address you provided when opening the account; it is a foreign address." data-es="Refiere al domicilio que ingresaste al momento de la apertura de la cuenta, es un domicilio extranjero.">Refers to the address you provided when opening the account; it is a foreign address.</div>
+          </div>
+        </div></div></div>
+
+        <!-- Foreign bank account -->
+        <div class="reveal" id="foreignFields"><div><div class="reveal-inner">
+          <div class="section-title" data-en="Foreign bank account" data-es="Cuenta bancaria extranjera">Foreign bank account</div>
+          <div class="section-note" data-en="You'll find these in the 'Foreign Trade' section. Otherwise, request them from an advisor." data-es="Los encuentras en la sección de 'Comercio Exterior'. Sino, debes solicitarlas a un asesor.">You'll find these in the 'Foreign Trade' section. Otherwise, request them from an advisor.</div>
+          <div class="field">
+            <label data-en="Do you have foreign citizenship?" data-es="¿Cuentas con ciudadanía extranjera?">Do you have foreign citizenship?</label>
+            <div class="radio-row" id="foreignCitizenshipRow">
+              <div class="radio-pill" data-value="yes" data-en-label="Yes" data-es-label="Sí">Yes</div>
+              <div class="radio-pill" data-value="no" data-en-label="No" data-es-label="No">No</div>
+            </div>
+          </div>
+          <div class="field">
+            <label data-en="Associated email address" data-es="Email asociado">Associated email address</label>
+            <input type="email" id="foreignEmail">
+          </div>
+          <div class="field">
+            <label data-en="SWIFT code" data-es="Código SWIFT">SWIFT code</label>
+            <input type="text" id="foreignSwift">
+          </div>
+          <div class="field">
+            <label data-en="Account holder (full name)" data-es="Account Holder (nombre completo)">Account holder (full name)</label>
+            <input type="text" id="foreignHolder">
+          </div>
+          <div class="field">
+            <label data-en="ACH/Wire routing number" data-es="ACH/Wire routing number">ACH/Wire routing number</label>
+            <input type="text" id="foreignRouting">
+            <div class="hint" data-en="8 random digits (e.g. 26073150)." data-es="Son 8 números aleatorios (Ej: 26073150).">8 random digits (e.g. 26073150).</div>
+          </div>
+          <div class="field">
+            <label data-en="Account number" data-es="Account number">Account number</label>
+            <input type="text" id="foreignAccountNumber">
+          </div>
+          <div class="field">
+            <label data-en="Account type" data-es="Account type">Account type</label>
+            <input type="text" id="foreignAccountType">
+          </div>
+        </div></div></div>
+
+        <!-- USD Argentina -->
+        <div class="reveal" id="argFields"><div><div class="reveal-inner">
+          <div class="section-title" data-en="USD - Argentina bank account" data-es="Cuenta bancaria USD - Argentina">USD - Argentina bank account</div>
+          <div class="section-note" data-en="For payment through this account, a Type E invoice must be issued to Glofy for the full settlement amount." data-es="Para que se abone por esta cuenta se deberá emitir Facturación E a Glofy por el monto total de la liquidación.">For payment through this account, a Type E invoice must be issued to Glofy for the full settlement amount.</div>
+          <div class="section-note" data-en="Details for receiving international transfers. You'll find them in the 'Foreign Trade' section. Otherwise, request them from an advisor." data-es="Datos para recibir transferencias internacionales. Los encontrás en la sección de 'Comercio Exterior'. Sino, debes solicitarlas a un asesor.">Details for receiving international transfers. You'll find them in the 'Foreign Trade' section. Otherwise, request them from an advisor.</div>
+          <div class="field">
+            <label data-en="Account number (in USD)" data-es="Número de cuenta (en USD)">Account number (in USD)</label>
+            <input type="text" id="argAccountNumber">
+          </div>
+          <div class="field">
+            <label data-en="Bank legal name" data-es="Razón social del banco">Bank legal name</label>
+            <input type="text" id="argBankName">
+          </div>
+          <div class="field">
+            <label data-en="SWIFT code (ARG)" data-es="Código SWIFT (de ARG)">SWIFT code (ARG)</label>
+            <input type="text" id="argSwift">
+          </div>
+          <div class="field">
+            <label data-en="Address associated with the account (optional)" data-es="Dirección asociada a la cuenta (opcional)">Address associated with the account (optional)</label>
+            <input type="text" id="argAddress">
+            <div class="hint" data-en="Refers to the address you provided when opening the account." data-es="Refiere al domicilio que ingresaste al momento de la apertura de la cuenta.">Refers to the address you provided when opening the account.</div>
+          </div>
+          <div class="field">
+            <label data-en="Please attach a photo of the account information provided by the bank" data-es="Te pedimos que nos adjuntes una foto de la información de cuenta provista por el banco">Please attach a photo of the account information provided by the bank</label>
+            <div class="file-drop" id="fileDrop" data-en="Click to upload" data-es="Hacé clic para adjuntar">Click to upload</div>
+            <div class="file-limit" data-en="Size limit: 10MB" data-es="Límite de tamaño: 10MB">Size limit: 10MB</div>
+          </div>
+        </div></div></div>
+
+      </div></div></div>
+
+      <!-- ===================== USDT branch ===================== -->
+      <div class="reveal" id="usdtSection"><div><div class="reveal-inner section">
+        <div class="field">
+          <label data-en="Preferred recipient in USDT" data-es="Preferred recipient in USDT">Preferred recipient in USDT</label>
+          <div class="hint" data-en="Examples: Binance, ARQ, Nexo, Cocos, etc." data-es="Examples: Binance, ARQ, Nexo, Cocos, etc.">Examples: Binance, ARQ, Nexo, Cocos, etc.</div>
+          <input type="text" id="usdtRecipient" style="margin-top:10px;">
+        </div>
+        <div class="section-title" data-en="USDT" data-es="USDT">USDT</div>
+        <div class="field">
+          <label data-en="Network" data-es="Red">Network</label>
+          <div class="radio-row" id="usdtNetworkRow">
+            <div class="radio-pill" data-value="TRC20">USDT - Tron (TRC20)</div>
+            <div class="radio-pill" data-value="BEP20">USDT - BNB Chain (BEP20)</div>
+            <div class="radio-pill" data-value="ERC20">Ethereum (ERC20)</div>
+            <div class="radio-pill" data-value="Polygon">USDT - Polygon</div>
+          </div>
+        </div>
+        <div class="field">
+          <label data-en="Address" data-es="Dirección">Address</label>
+          <input type="text" id="usdtAddress">
+        </div>
+      </div></div></div>
+
+      <input type="file" id="fileInput" accept="image/*,application/pdf" class="hidden" style="display:none;">
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="spinner"></span>
+        <span data-en="Submit" data-es="Enviar">Submit</span>
+      </button>
+      <div class="status" id="status"></div>
+    </form>
+  </div>
+
+  <!-- THANK YOU SCREEN -->
+  <div class="screen hidden center" id="successScreen">
+    <svg class="check-wrap" viewBox="0 0 56 56">
+      <circle class="check-circle" cx="28" cy="28" r="25"/>
+      <path class="check-mark" d="M17 29l8 8 14-16"/>
+    </svg>
+    <h1 data-en="Thank you!" data-es="¡Muchas gracias!">Thank you!</h1>
+    <p class="subtitle" style="margin-bottom:6px;">People Dept</p>
+    <p class="subtitle" data-en="If you missed filling in any of the requested information, contact rrhh@glofy.co for assistance. A copy of your responses will also be sent to your email." data-es="Si te faltó completar alguno de los datos solicitados, comunicate con rrhh@glofy.co para solicitar asistencia. También te enviaremos una copia de tus respuestas a tu mail.">If you missed filling in any of the requested information, contact rrhh@glofy.co for assistance. A copy of your responses will also be sent to your email.</p>
+    <button type="button" class="start-btn" id="homeBtn" data-en="Back to home" data-es="Volver al inicio">Back to home</button>
+  </div>
+
+</div>
+
+<footer data-en="© Glofy LLC. All Rights Reserved." data-es="© Glofy LLC. Todos los derechos reservados.">© Glofy LLC. All Rights Reserved.</footer>
+</div>
+
+<script>
+// ====== CONFIG ======
+// Reemplazar por la URL del deployment del Web App de Apps Script (Code.gs)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLGS17ulbc6QotSfTIClAWmtyJaTHzyLdeMfT26oRg4-RLfl_oi2Tmm8hkv_mqttI/exec";
+// =====================
+
+let lang = 'en';
+let currency = null;
+let usdEntity = null;
+let foreignCitizenship = null;
+let usdtNetwork = null;
+let uploadedFile = null;
+
+function applyLang(){
+  document.querySelectorAll('[data-en]').forEach(el=>{ el.textContent = el.getAttribute('data-'+lang); });
+  document.querySelectorAll('[data-en-label]').forEach(el=>{ el.textContent = el.getAttribute('data-'+lang+'-label'); });
+  document.querySelectorAll('.lang-toggle button').forEach(b=>{ b.classList.toggle('active', b.dataset.lang===lang); });
+}
+document.querySelectorAll('.lang-toggle button').forEach(b=>{
+  b.addEventListener('click', ()=>{ lang=b.dataset.lang; applyLang(); });
+});
+
+function switchScreen(hideEl, showEl){
+  hideEl.classList.remove('entered'); hideEl.classList.add('entering');
+  setTimeout(()=>{ hideEl.classList.add('hidden'); }, 300);
+  showEl.classList.remove('hidden');
+  showEl.classList.add('entering');
+  void showEl.offsetWidth; // reflow
+  requestAnimationFrame(()=>{
+    showEl.classList.remove('entering');
+    showEl.classList.add('entered');
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  switchScreen(document.getElementById('welcomeScreen'), document.getElementById('formScreen'));
+});
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  switchScreen(document.getElementById('formScreen'), document.getElementById('welcomeScreen'));
+});
+
+document.getElementById('homeBtn').addEventListener('click', ()=>{
+  document.getElementById('transferForm').reset();
+  document.querySelectorAll('.radio-pill.selected').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('.reveal.open').forEach(r=>r.classList.remove('open'));
+  currency = null; usdEntity = null; foreignCitizenship = null; usdtNetwork = null; uploadedFile = null;
+  fileDrop.classList.remove('has-file');
+  fileDrop.textContent = lang==='en' ? 'Click to upload' : 'Hacé clic para adjuntar';
+  switchScreen(document.getElementById('successScreen'), document.getElementById('welcomeScreen'));
+});
+
+function toggleReveal(el, open){
+  el.classList.toggle('open', open);
+}
+
+document.querySelectorAll('#currencyRow .radio-pill').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    currency = p.dataset.value;
+    document.querySelectorAll('#currencyRow .radio-pill').forEach(x=>x.classList.remove('selected'));
+    p.classList.add('selected');
+    toggleReveal(document.getElementById('usdSection'), currency==='USD');
+    toggleReveal(document.getElementById('usdtSection'), currency==='USDT');
+  });
+});
+
+document.querySelectorAll('#usdEntityRow .radio-pill').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    usdEntity = p.dataset.value;
+    document.querySelectorAll('#usdEntityRow .radio-pill').forEach(x=>x.classList.remove('selected'));
+    p.classList.add('selected');
+    toggleReveal(document.getElementById('walletFields'), usdEntity==='wallet');
+    toggleReveal(document.getElementById('foreignFields'), usdEntity==='foreign');
+    toggleReveal(document.getElementById('argFields'), usdEntity==='arg');
+  });
+});
+
+document.querySelectorAll('#foreignCitizenshipRow .radio-pill').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    foreignCitizenship = p.dataset.value;
+    document.querySelectorAll('#foreignCitizenshipRow .radio-pill').forEach(x=>x.classList.remove('selected'));
+    p.classList.add('selected');
+  });
+});
+
+document.querySelectorAll('#usdtNetworkRow .radio-pill').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    usdtNetwork = p.dataset.value;
+    document.querySelectorAll('#usdtNetworkRow .radio-pill').forEach(x=>x.classList.remove('selected'));
+    p.classList.add('selected');
+  });
+});
+
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+fileDrop.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', ()=>{
+  const f = fileInput.files[0];
+  if(f){
+    const reader = new FileReader();
+    reader.onload = ()=>{ uploadedFile = { name:f.name, mimeType:f.type, data:reader.result.split(',')[1] }; };
+    reader.readAsDataURL(f);
+    fileDrop.classList.add('has-file');
+    fileDrop.textContent = f.name;
+  }
+});
+
+document.getElementById('transferForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const status = document.getElementById('status');
+  const btn = document.getElementById('submitBtn');
+
+  if(!currency){
+    status.textContent = lang==='en' ? 'Please select a currency type.' : 'Seleccioná un tipo de moneda.';
+    status.classList.add('error'); return;
+  }
+  if(currency==='USD' && !usdEntity){
+    status.textContent = lang==='en' ? 'Please select a destination entity.' : 'Seleccioná una entidad de destino.';
+    status.classList.add('error'); return;
+  }
+
+  const payload = {
+    fullName: document.getElementById('fullName').value,
+    email: document.getElementById('email').value,
+    currencyType: currency,
+    lang: lang,
+    submittedAt: new Date().toISOString(),
+    file: uploadedFile
+  };
+
+  if(currency==='USD'){
+    payload.usdEntity = usdEntity;
+    if(usdEntity==='wallet'){
+      Object.assign(payload, {
+        walletEmail: document.getElementById('walletEmail').value,
+        walletHolder: document.getElementById('walletHolder').value,
+        walletRouting: document.getElementById('walletRouting').value,
+        walletAccountNumber: document.getElementById('walletAccountNumber').value,
+        walletAccountType: document.getElementById('walletAccountType').value,
+        walletAddress: document.getElementById('walletAddress').value
+      });
+    } else if(usdEntity==='foreign'){
+      Object.assign(payload, {
+        foreignCitizenship: foreignCitizenship,
+        foreignEmail: document.getElementById('foreignEmail').value,
+        foreignSwift: document.getElementById('foreignSwift').value,
+        foreignHolder: document.getElementById('foreignHolder').value,
+        foreignRouting: document.getElementById('foreignRouting').value,
+        foreignAccountNumber: document.getElementById('foreignAccountNumber').value,
+        foreignAccountType: document.getElementById('foreignAccountType').value
+      });
+    } else if(usdEntity==='arg'){
+      Object.assign(payload, {
+        argAccountNumber: document.getElementById('argAccountNumber').value,
+        argBankName: document.getElementById('argBankName').value,
+        argSwift: document.getElementById('argSwift').value,
+        argAddress: document.getElementById('argAddress').value
+      });
+    }
+  } else if(currency==='USDT'){
+    Object.assign(payload, {
+      usdtRecipient: document.getElementById('usdtRecipient').value,
+      usdtNetwork: usdtNetwork,
+      usdtAddress: document.getElementById('usdtAddress').value
+    });
+  }
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  status.classList.remove('error');
+  status.textContent = '';
+
+  try{
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script Web Apps no devuelven headers CORS por defecto
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify(payload)
+    });
+    switchScreen(document.getElementById('formScreen'), document.getElementById('successScreen'));
+  }catch(err){
+    status.classList.add('error');
+    status.textContent = lang==='en' ? 'Something went wrong. Try again.' : 'Algo salió mal. Intentá de nuevo.';
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+});
+
+applyLang();
+document.getElementById('welcomeScreen').classList.add('entered');
+</script>
+</body>
+</html>
