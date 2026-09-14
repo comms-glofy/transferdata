@@ -239,27 +239,27 @@
           <div class="section-title" data-en="Wallet" data-es="Wallet">Wallet</div>
           <div class="field">
             <label data-en="Associated email address" data-es="Email asociado">Associated email address</label>
-            <input type="email" id="walletEmail">
+            <input type="email" id="walletEmail" required>
           </div>
           <div class="field">
             <label data-en="Account holder" data-es="Account holder">Account holder</label>
-            <input type="text" id="walletHolder">
+            <input type="text" id="walletHolder" required>
           </div>
           <div class="field">
             <label data-en="ACH and Wire routing number" data-es="ACH and Wire routing number">ACH and Wire routing number</label>
-            <input type="text" id="walletRouting">
+            <input type="text" id="walletRouting" required>
           </div>
           <div class="field">
             <label data-en="Account number" data-es="Account number">Account number</label>
-            <input type="text" id="walletAccountNumber">
+            <input type="text" id="walletAccountNumber" required>
           </div>
           <div class="field">
             <label data-en="Account type" data-es="Account type">Account type</label>
-            <input type="text" id="walletAccountType">
+            <input type="text" id="walletAccountType" required>
           </div>
           <div class="field">
             <label data-en="Address" data-es="Address">Address</label>
-            <input type="text" id="walletAddress">
+            <input type="text" id="walletAddress" required>
             <div class="hint" data-en="Refers to the address you provided when opening the account; it is a foreign address." data-es="Refiere al domicilio que ingresaste al momento de la apertura de la cuenta, es un domicilio extranjero.">Refers to the address you provided when opening the account; it is a foreign address.</div>
           </div>
         </div></div></div>
@@ -277,28 +277,28 @@
           </div>
           <div class="field">
             <label data-en="Associated email address" data-es="Email asociado">Associated email address</label>
-            <input type="email" id="foreignEmail">
+            <input type="email" id="foreignEmail" required>
           </div>
           <div class="field">
             <label data-en="SWIFT code" data-es="Código SWIFT">SWIFT code</label>
-            <input type="text" id="foreignSwift">
+            <input type="text" id="foreignSwift" required>
           </div>
           <div class="field">
             <label data-en="Account holder (full name)" data-es="Account Holder (nombre completo)">Account holder (full name)</label>
-            <input type="text" id="foreignHolder">
+            <input type="text" id="foreignHolder" required>
           </div>
           <div class="field">
             <label data-en="ACH/Wire routing number" data-es="ACH/Wire routing number">ACH/Wire routing number</label>
-            <input type="text" id="foreignRouting">
+            <input type="text" id="foreignRouting" required>
             <div class="hint" data-en="8 random digits (e.g. 26073150)." data-es="Son 8 números aleatorios (Ej: 26073150).">8 random digits (e.g. 26073150).</div>
           </div>
           <div class="field">
             <label data-en="Account number" data-es="Account number">Account number</label>
-            <input type="text" id="foreignAccountNumber">
+            <input type="text" id="foreignAccountNumber" required>
           </div>
           <div class="field">
             <label data-en="Account type" data-es="Account type">Account type</label>
-            <input type="text" id="foreignAccountType">
+            <input type="text" id="foreignAccountType" required>
           </div>
         </div></div></div>
 
@@ -309,15 +309,15 @@
           <div class="section-note" data-en="Details for receiving international transfers. You'll find them in the 'Foreign Trade' section. Otherwise, request them from an advisor." data-es="Datos para recibir transferencias internacionales. Los encontrás en la sección de 'Comercio Exterior'. Sino, debes solicitarlas a un asesor.">Details for receiving international transfers. You'll find them in the 'Foreign Trade' section. Otherwise, request them from an advisor.</div>
           <div class="field">
             <label data-en="Account number (in USD)" data-es="Número de cuenta (en USD)">Account number (in USD)</label>
-            <input type="text" id="argAccountNumber">
+            <input type="text" id="argAccountNumber" required>
           </div>
           <div class="field">
             <label data-en="Bank legal name" data-es="Razón social del banco">Bank legal name</label>
-            <input type="text" id="argBankName">
+            <input type="text" id="argBankName" required>
           </div>
           <div class="field">
             <label data-en="SWIFT code (ARG)" data-es="Código SWIFT (de ARG)">SWIFT code (ARG)</label>
-            <input type="text" id="argSwift">
+            <input type="text" id="argSwift" required>
           </div>
           <div class="field">
             <label data-en="Address associated with the account (optional)" data-es="Dirección asociada a la cuenta (opcional)">Address associated with the account (optional)</label>
@@ -338,7 +338,7 @@
         <div class="field">
           <label data-en="Preferred recipient in USDT" data-es="Preferred recipient in USDT">Preferred recipient in USDT</label>
           <div class="hint" data-en="Examples: Binance, ARQ, Nexo, Cocos, etc." data-es="Examples: Binance, ARQ, Nexo, Cocos, etc.">Examples: Binance, ARQ, Nexo, Cocos, etc.</div>
-          <input type="text" id="usdtRecipient" style="margin-top:10px;">
+          <input type="text" id="usdtRecipient" style="margin-top:10px;" required>
         </div>
         <div class="section-title" data-en="USDT" data-es="USDT">USDT</div>
         <div class="field">
@@ -352,7 +352,7 @@
         </div>
         <div class="field">
           <label data-en="Address" data-es="Dirección">Address</label>
-          <input type="text" id="usdtAddress">
+          <input type="text" id="usdtAddress" required>
         </div>
       </div></div></div>
 
@@ -440,6 +440,12 @@ function toggleReveal(el, open){
   el.classList.toggle('open', open);
 }
 
+function setRequiredIn(containerEl, isRequired){
+  containerEl.querySelectorAll('input[type=text], input[type=email]').forEach(inp=>{
+    if(isRequired) inp.setAttribute('required',''); else inp.removeAttribute('required');
+  });
+}
+
 document.querySelectorAll('#currencyRow .radio-pill').forEach(p=>{
   p.addEventListener('click', ()=>{
     currency = p.dataset.value;
@@ -447,6 +453,16 @@ document.querySelectorAll('#currencyRow .radio-pill').forEach(p=>{
     p.classList.add('selected');
     toggleReveal(document.getElementById('usdSection'), currency==='USD');
     toggleReveal(document.getElementById('usdtSection'), currency==='USDT');
+    setRequiredIn(document.getElementById('usdtSection'), currency==='USDT');
+    if(currency!=='USD'){
+      document.querySelectorAll('#usdEntityRow .radio-pill').forEach(x=>x.classList.remove('selected'));
+      usdEntity = null;
+      ['walletFields','foreignFields','argFields'].forEach(id=>{
+        const el = document.getElementById(id);
+        toggleReveal(el, false);
+        setRequiredIn(el, false);
+      });
+    }
   });
 });
 
@@ -458,6 +474,10 @@ document.querySelectorAll('#usdEntityRow .radio-pill').forEach(p=>{
     toggleReveal(document.getElementById('walletFields'), usdEntity==='wallet');
     toggleReveal(document.getElementById('foreignFields'), usdEntity==='foreign');
     toggleReveal(document.getElementById('argFields'), usdEntity==='arg');
+    setRequiredIn(document.getElementById('walletFields'), usdEntity==='wallet');
+    setRequiredIn(document.getElementById('foreignFields'), usdEntity==='foreign');
+    setRequiredIn(document.getElementById('argFields'), usdEntity==='arg');
+    document.getElementById('argAddress').removeAttribute('required');
   });
 });
 
@@ -502,6 +522,18 @@ document.getElementById('transferForm').addEventListener('submit', async (e)=>{
   }
   if(currency==='USD' && !usdEntity){
     status.textContent = lang==='en' ? 'Please select a destination entity.' : 'Seleccioná una entidad de destino.';
+    status.classList.add('error'); return;
+  }
+  if(currency==='USD' && usdEntity==='foreign' && !foreignCitizenship){
+    status.textContent = lang==='en' ? 'Please answer the foreign citizenship question.' : 'Respondé si contás con ciudadanía extranjera.';
+    status.classList.add('error'); return;
+  }
+  if(currency==='USD' && usdEntity==='arg' && !uploadedFile){
+    status.textContent = lang==='en' ? 'Please attach the bank account photo.' : 'Adjuntá la foto de la información de cuenta.';
+    status.classList.add('error'); return;
+  }
+  if(currency==='USDT' && !usdtNetwork){
+    status.textContent = lang==='en' ? 'Please select a network.' : 'Seleccioná una red.';
     status.classList.add('error'); return;
   }
 
