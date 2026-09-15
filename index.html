@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transfer Data / Datos de Transferencia — Glofy</title>
+<title>Transfer Data - Glofy</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/comms-glofy/glofy-assets/refs/heads/main/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -237,6 +237,11 @@
         <!-- Wallet -->
         <div class="reveal" id="walletFields"><div><div class="reveal-inner">
           <div class="section-title" data-en="Wallet" data-es="Wallet">Wallet</div>
+          <div class="field">
+            <label data-en="Which wallet / provider?" data-es="¿Qué wallet / proveedor?">Which wallet / provider?</label>
+            <div class="hint" data-en="Examples: Wise, Payoneer, ARQ, Nexo, Cocos, etc." data-es="Ejemplos: Wise, Payoneer, ARQ, Nexo, Cocos, etc.">Examples: Wise, Payoneer, ARQ, Nexo, Cocos, etc.</div>
+            <input type="text" id="walletProvider" style="margin-top:10px;" required>
+          </div>
           <div class="field">
             <label data-en="Associated email address" data-es="Email asociado">Associated email address</label>
             <input type="email" id="walletEmail" required>
@@ -550,6 +555,7 @@ document.getElementById('transferForm').addEventListener('submit', async (e)=>{
     payload.usdEntity = usdEntity;
     if(usdEntity==='wallet'){
       Object.assign(payload, {
+        walletProvider: document.getElementById('walletProvider').value,
         walletEmail: document.getElementById('walletEmail').value,
         walletHolder: document.getElementById('walletHolder').value,
         walletRouting: document.getElementById('walletRouting').value,
